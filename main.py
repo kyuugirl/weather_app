@@ -4,8 +4,10 @@ from PIL import Image, ImageTk
 import requests
 import pygame
 import json
-import io
 import os
+import geocoder
+
+g = geocoder.ip('me')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 config_file = os.path.join(BASE_DIR, "config.json")
@@ -19,7 +21,7 @@ with open(config_file, "r") as f:
 
 
 API_key = config["key"]
-city = config["city"]
+city = g.city
 base_url = "https://api.openweathermap.org/data/2.5/weather"
 
 pygame.mixer.init()
