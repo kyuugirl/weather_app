@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from PIL import Image, ImageTk, ImageSequence
 import requests
 import pygame
@@ -20,7 +20,6 @@ with open(config_file, "r") as f:
     config = json.load(f)
 
 API_key = config["key"]
-city = g.city
 base_url = "https://api.openweathermap.org/data/2.5/weather"
 
 pygame.mixer.init()
@@ -32,6 +31,8 @@ class LofiWeatherApp:
         self.root.geometry("800x500")
         self.root.resizable(False, False)
 
+        self.city = g.city if g.city else "London"
+
         # Canvas for layering (background + animated snow)
         self.canvas = tk.Canvas(self.root, width=800, height=500, highlightthickness=0)
         self.canvas.pack(fill="both", expand=True)
@@ -42,6 +43,15 @@ class LofiWeatherApp:
         self.snow_id = None
         self.snow_active = False
 
+        self.city_var = tk.StringVar(value=self.city)
+        self.dropdown = ttk.Combobox(self.root, textvariable=self.city_var, width=20)
+        self.dropdown.place(relx = 0.1, rely=0.08, anchor="center")
+        self.dropdown['values'] = ["London", "Dodoma", "Lagos", "Paris", "Tokyo", "Seoul"]
+
+        self.search_btn = tk.Button(self.root, text="search", command=self.change_city)
+        self.search_btn.place(relx=0.25, rely= 0.08, anchor="center")
+
+        #info label for weather 
         self.info_label = tk.Label(
             self.root,
             text="Loading weather...",
@@ -51,6 +61,16 @@ class LofiWeatherApp:
         )
         self.info_label.place(relx=0.5, rely=0.1, anchor="center")
 
+        self.update_weather()
+
+    def change_city(self):
+        new_city = self.city_var.get().strip()
+
+        if new_city =="":
+            messagebox.showerror("error", "city name empty, please fill with valid city")
+            return
+        
+        self.city = new_city
         self.update_weather()
 
     def get_weather(self, city):
@@ -63,7 +83,7 @@ class LofiWeatherApp:
             return None
 
     def update_weather(self):
-        data = self.get_weather(city)
+        data = self.get_weather(self.city)
         if not data:
             return
         
@@ -71,7 +91,7 @@ class LofiWeatherApp:
         temp = data["main"]["temp"]
         desc = data["weather"][0]["description"].title()
 
-        self.info_label.config(text=f"{city}: {desc}, {temp:.1f}°C")
+        self.info_label.config(text=f"{self.city}: {desc}, {temp:.1f}°C")
 
         self.set_scene(condition)
 
@@ -80,7 +100,7 @@ class LofiWeatherApp:
         self.snow_active = False
 
         if "rain" in condition:
-            bg = asset("assets/bgs/rain.jpg")
+            bg = asset("assets/bgs/rainy.jpg")
             music = asset("assets/music/rain.mp3")
 
         elif "snow" in condition:
@@ -91,8 +111,12 @@ class LofiWeatherApp:
             self.snow_active = True
 
         elif "clear" in condition:
-            bg = asset("assets/bgs/clear.jpg")
-            music = asset("assets/music/clear.mp3")
+            bg = asset("assets/bgs/sunny.jpg")
+            music = asset("assets/music/sun.mp3")
+
+        elif "cloud" in condition:
+            bg = asset("assets/bgs/cloudy.jpg")
+            music = asset("assets/music/cloudy.mp3")
 
         else:
             bg = asset("assets/bgs/night.jpg")
