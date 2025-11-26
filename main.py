@@ -210,7 +210,7 @@ class LofiWeatherApp:
             music = get_asset("assets/music/rain.mp3")
 
         elif "snow" in condition:
-            bg = get_asset("assets/bgs/snow.jpg")
+            bg = get_asset("assets/bgs/snowy.jpg")
             music = get_asset("assets/music/snow.mp3")
             snow_gif = get_asset("assets/bgs/snow_anim.gif")
             self.load_animation(snow_gif)
@@ -267,14 +267,14 @@ class LofiWeatherApp:
         if not self.animation_active:
             return
 
-        frame = self.animation_frames[self.snow_index]
+        frame = self.animation_frames[self.animation_index]
 
         if self.animation_id is None:
             self.animation_id = self.canvas.create_image(0, 0, anchor="nw", image=frame)
         else:
             self.canvas.itemconfig(self.animation_id, image=frame)
 
-        self.snow_index = (self.animation_index + 1) % len(self.animation_frames)
+        self.animation_index = (self.animation_index + 1) % len(self.animation_frames)
         self.root.after(80, self.animate)
 
 # -------------------------------------------------------------
