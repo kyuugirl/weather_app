@@ -636,11 +636,11 @@ class LofiWeatherApp(QMainWindow):
 
         elif condition == "squall":
             fg_path = get_asset("effects/squall.gif")
-            music_path = get_asset("music/cloudy.mp3")
+            music_path = get_asset("music/atmosphere.mp3")
 
         # Fog/haze/etc share no foreground (currently)
         elif condition in ["mist", "fog", "haze", "smoke", "dust", "ash", "sand"]:
-            music_path = get_asset("music/cloudy.mp3")
+            music_path = get_asset("music/atmosphere.mp3")
 
         # Update UI
         self.update_background(bg_path)
