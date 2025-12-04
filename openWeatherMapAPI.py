@@ -11,6 +11,7 @@ class OpenWeatherClient:
         # 3.0 Endpoint url
         # self.onecall_url = "https://api.openweathermap.org/data/3.0/onecall"
         self.session = requests.Session()
+        self.city = city
         self.set_location(city)
 
     def set_location(self, city):
@@ -25,6 +26,7 @@ class OpenWeatherClient:
         if not data:
             raise ValueError(f"City '{city}' not found.")
         self.lat, self.lon = data[0]["lat"], data[0]["lon"]
+        self.city = city
 
     # Get current weather at a preset location
     def get_current_weather(self):
