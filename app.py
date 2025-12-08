@@ -4,6 +4,8 @@ import sys
 import json
 import pygame
 import geocoder
+import random
+from PyQt6.QtGui import QKeySequence, QShortcut
 from datetime import datetime, timedelta, timezone
 from openWeatherMapAPI import OpenWeatherClient
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QStackedLayout, QVBoxLayout, QHBoxLayout, QComboBox, QMessageBox, QSizePolicy, QGridLayout, QScrollArea
@@ -17,7 +19,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 config_file = os.path.join(BASE_DIR, "config.json")
 
 def get_asset(path):
-    return os.path.join(BASE_DIR, "assets/", path)
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, "assets", path)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)),"assets", path)
 
 # Load API key
 with open(config_file, "r") as f:
@@ -47,6 +51,59 @@ ICON_MAP = {
     "50n": get_asset("icons/fog.gif"),
 }
 
+# same as icon cept for music 
+MUSIC_MAP = {
+    "clear": [
+        get_asset("music/clear1.mp3"),
+        get_asset("music/clear2.mp3"),
+        get_asset("music/clear3.mp3"),
+        get_asset("music/clear4.mp3"),
+    ],
+    "clouds": [
+        get_asset("music/clouds1.mp3"),
+        get_asset("music/clouds2.mp3"),
+        get_asset("music/clouds3.mp3"),
+        get_asset("music/clouds4.mp3"),
+    ],
+    "rain": [
+        get_asset("music/rain1.mp3"),
+        get_asset("music/rain2.mp3"),
+        get_asset("music/rain3.mp3"),
+        get_asset("music/rain4.mp3"),
+    ],
+    "drizzle": [
+        get_asset("music/drizzle1.mp3"),
+        get_asset("music/drizzle2.mp3"),
+        get_asset("music/drizzle3.mp3"),
+        get_asset("music/drizzle4.mp3"),
+    ],
+    "thunderstorm": [
+        get_asset("music/thunder1.mp3"),
+        get_asset("music/thunder2.mp3"),
+        get_asset("music/thunder3.mp3"),
+        get_asset("music/thunder4.mp3"),
+    ],
+    "snow": [
+        get_asset("music/snow1.mp3"),
+        get_asset("music/snow2.mp3"),
+        get_asset("music/snow3.mp3"),
+        get_asset("music/snow4.mp3"),
+    ],
+    "squall": [
+        get_asset("music/squall1.mp3"),
+        get_asset("music/squall2.mp3"),
+        get_asset("music/squall3.mp3"),
+        get_asset("music/squall4.mp3"),
+
+    ],
+    "atmosphere": [
+        get_asset("music/atmo1.mp3"),
+        get_asset("music/atmo2.mp3"),
+        get_asset("music/atmo3.mp3"),
+        get_asset("music/atmo4.mp3"),
+    ],
+
+}
 # -------------------------------------------------------------
 # METRIC WIDGET
 # -------------------------------------------------------------
@@ -56,6 +113,18 @@ class MetricWidget(QWidget):
 
         # Transparent background so it blends with your animated UI
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowSystemMenuHint |
+            Qt.WindowType.WindowMinMaxButtonsHint
+        )
+
+        self.setStyleSheet("""
+
+            QMainWindow {
+                background: transparent;                   
+            }
+        """)
 
         # ---------- MAIN HORIZONTAL LAYOUT ----------
         hbox = QHBoxLayout(self)
@@ -106,6 +175,13 @@ class MetricWidget(QWidget):
         hbox.addWidget(self.icon_label)
         hbox.addWidget(right_box)
 
+        self.setStyleSheet("""
+            background: rgba(100,100,100,40);
+            border: 1px solid rgba(200,200,200,70);
+            border-radius: 10px;
+            padding: 4px;                   
+        """)
+
     # Public update text
     def set_value(self, text):
         self.value_label.setText(text)
@@ -136,13 +212,21 @@ class LofiWeatherApp(QMainWindow):
         pygame.mixer.init()
 
         # IMPORTANT: central widget for layouts
-        self.central = QWidget(self)
-        self.setCentralWidget(self.central)
+        glass = QWidget(self)
+        glass.setStyleSheet("""
+            background: rgba(100,100,100,40);
+            border: 1px solid rgba(200,200,200,80);
+            border-radius: 20px;
+            backdrop-filter: blur(30px);  
+        """)
+        
+        self.central = glass
+        self.setCentralWidget(glass)
 
         # VBox main layout
-        self.main_layout = QVBoxLayout(self.central)
-        self.main_layout.setContentsMargins(10, 10, 10, 10)
-        self.main_layout.setSpacing(0)
+        self.main_layout = QVBoxLayout(glass)
+        self.main_layout.setContentsMargins(20, 20, 20, 20)
+        self.main_layout.setSpacing(10)
 
         # Background + foreground animation + music
         self.background = QPixmap()
@@ -175,17 +259,23 @@ class LofiWeatherApp(QMainWindow):
         self.location_dropdown.setStyleSheet("""
             QComboBox {
                 color: white;
-                background: rgba(255,255,255,40); 
-                padding: 4px 8px;
-                border-radius: 6px;
-                border: 1px solid rgba(255,255,255,80);
-                font-size: 14px;
+                background: rgba(200,200,200,40); 
+                padding: 6px 10px;
+                border-radius: 12px;
+                border: 2px solid rgba(200,200,200,120);
+                font-size: 15px;
                 font-weight: bold;
+                backdrop-filter: blur(25px);
+                                        
             }
+            QComboBox: hover{
+                background: rgba(255,255,255,80);
+            }                              
+                                                
             QComboBox QAbstractItemView {
-                background: #2d2f3a;
+                background: rgba(30,30,30,150);
                 color: white;
-                selection-background-color: #3d3f4a;
+                border: 1px solid rgba(255,255,255,50);
             }
         """)
         
@@ -213,6 +303,9 @@ class LofiWeatherApp(QMainWindow):
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.update_weather)
         self.update_timer.start(3600000)  # 1 hour in milliseconds
+
+        mute = QShortcut(QKeySequence("Ctrl+M"), self)
+        mute.activated.connect(self.toggle_music)
 
 
 
@@ -253,13 +346,13 @@ class LofiWeatherApp(QMainWindow):
     def list_cities(self):
         city = self.location_dropdown.currentText().strip()
         if not city:
-            QMessageBox.critical(self, "Error", "City name empty, please enter a valid city")
+            QMessageBox.information(self, "Error", "City name empty, please enter a valid city")
             return
 
         # Query the 2.5 API to check if location is valid
         geo = self.api.session.get(self.api.geo_url, params = {"q": city, "limit": 10, "appid": API_Key},).json()
         if not geo:
-            QMessageBox.showerror(self, "Error", "No matching locations found.")
+            QMessageBox.information(self, "Error", "No matching locations found.")
             return
 
         # Build formatted dropdown list
@@ -401,6 +494,15 @@ class LofiWeatherApp(QMainWindow):
                 "date_key": None
             }
 
+            tile["block"].setStyleSheet("""
+                background: rgba(100,100,100,70);
+                border: 1px solid rgba(255, 255, 255,100);
+                border-radius: 14px;
+                padding: 6px;
+                backdrop-filter: blur(20px);                            
+            
+            """)
+
             # ----- Vertical block for the day -----
             v = QVBoxLayout(tile["block"])
             v.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -467,6 +569,18 @@ class LofiWeatherApp(QMainWindow):
         self.hourly_layout.setSpacing(0)
 
         self.hourly_scroll.setWidget(self.hourly_container)
+        self.hourly_scroll.setStyleSheet("""
+        QScrollArea {
+            background: transparent;
+            border: none;
+        }
+        QWidget {
+            background: rgba(100,100,100,70);
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,80);
+            backdrop-filter: blur(20px);                                 
+        }                         
+        """)
 
         # pre-create row widgets (max 24 entries)
         self.hour_rows = []
@@ -598,7 +712,7 @@ class LofiWeatherApp(QMainWindow):
 
         # Default values
         fg_path = None
-        music_path = get_asset("music/clear.mp3")
+        music_path = get_asset("music/clear1.mp3")
 
         # Special mapping for background filenames
         condition_map = {
@@ -625,22 +739,42 @@ class LofiWeatherApp(QMainWindow):
         # Background path (day/night aware)
         bg_path = get_asset(f"backgrounds/{root}_{dn}.jpg")
 
+        music_key = None
+
         # Foreground effects
-        if condition in ["rain", "drizzle", "thunderstorm"]:
-            fg_path = get_asset("effects/rain.gif")  # thunderstorm effect later
-            music_path = get_asset("music/rain.mp3")
+        if condition in ["rain", "drizzle"]:
+            fg_path = get_asset("effects/rain.gif")  
+            music_key = "rain" if condition == "rain" else "drizzle" 
+
+        elif condition == "thunderstorm":
+            fg_path = get_asset("effects/thunder.gif") 
+            music_key = "thunderstorm"
 
         elif condition == "snow":
             fg_path = get_asset("effects/snow.gif")
-            music_path = get_asset("music/snow.mp3")
+            music_key = "snow"
 
         elif condition == "squall":
             fg_path = get_asset("effects/squall.gif")
-            music_path = get_asset("music/atmosphere.mp3")
+            music_key = "squall"
 
         # Fog/haze/etc share no foreground (currently)
-        elif condition in ["mist", "fog", "haze", "smoke", "dust", "ash", "sand"]:
-            music_path = get_asset("music/atmosphere.mp3")
+        elif condition in ["mist", "fog", "haze",]:
+            fg_path = get_asset("effects/fog.gif")
+            music_key = "atmosphere"
+
+        elif condition in ["smoke", "dust", "ash", "sand"]:
+            fg_path = get_asset("effects/dust.gif")
+            music_key = "atmosphere"
+
+        else:
+            if condition == "clouds":
+                music_key = "clouds"
+            else:
+                music_key = "clear"
+
+        if music_key is not None and music_key in MUSIC_MAP:
+            music_path = random.choice(MUSIC_MAP[music_key])
 
         # Update UI
         self.update_background(bg_path)
@@ -651,6 +785,13 @@ class LofiWeatherApp(QMainWindow):
             pygame.mixer.music.load(music_path)
             pygame.mixer.music.play(-1)
             self.music = music_path
+
+    def toggle_music(self):
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.pause()
+        else:
+            pygame.mixer.music.unpause()
+    
 
 # -------------------------------------------------------------
 # RUN APPLICATION
