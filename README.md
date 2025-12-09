@@ -31,8 +31,8 @@ More on weather conditions: https://openweathermap.org/weather-conditions
 
 ## Forecast Display
 - The main screen shows the current weather conditions
-- The weekly panel provides seven days of compact summaries
-- Expanding a day reveals hourly details with temperature, cloud cover, wind, and precipitation trends
+- The weekly panel provides 5 days of compact summaries
+- Expanded table reveals 3 hour interval of the day's forcast with temperature and precipitation trends
 
 # Features
 ## Current Weather
@@ -41,28 +41,26 @@ More on weather conditions: https://openweathermap.org/weather-conditions
 - Auto-selected lofi track and image that fits the current atmosphere
 
 ## Weekly Forecast
-- Seven-day summary with temperature and condition icons
+- five-day summary with temperature and condition icons
 - Scientific values kept simple: max/min temperature and general condition
 - Click any day to reveal hourly data
 
 ## Hourly Weather Details
 - Temperature
 - Precipitation probability
-- Cloud cover and wind (small icons/gifs)
+- General condition (small icons/gifs)
 
 ## Location Selection
 - Search for any location
-- Saves your most recent selection
-- Use current location if allowed
+- Use current location on start up based on IP Address
 
 Refreshes the widget automatically after a given time 
 
 # How It Works
-1. The program requests weather data from OpenWeather’s Current Weather, One-Call, and Forecast endpoints.
+1. The program requests weather data from OpenWeather’s Current Weather and Forecast endpoints.
 2. Weather codes are grouped (e.g., 2xx = thunderstorm, 3xx = drizzle).
 3. These groups map to predefined audio playlists.
 4. A compact GUI displays the current snapshot and upcoming days.
-5. Expanding a day triggers a secondary API call for hourly data.
 
 To easily remember the architecture: API → Filter → Match → Display → Audio.
 
@@ -71,8 +69,18 @@ To easily remember the architecture: API → Filter → Match → Display → Au
 - OpenWeather API key
 
 ## Required external packages
-- tkinter, json, os → built into Python
+- pyqt6, json, os → built into Python
 - Pillow → needed for PIL
 - requests → HTTP calls to OpenWeather
 - pygame → audio playback for lofi
 - geocoder → geolocation lookup
+
+**Footnote**  
+- While the application is running, use **CTRL+M** to toggle music on or off.
+- Music files are not included due to size constraints.  
+- If using the source code, replace the placeholder API key in 'config.json' with your own.  
+- The file `openWeatherMapAPI.py` contains commented code for API 3.0, which can be enabled if you have the appropriate key.
+  
+
+
+
